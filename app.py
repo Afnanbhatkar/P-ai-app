@@ -468,8 +468,9 @@ def interact_with_piai(query):
         
     # Check if the user query matches any saved conversation
     with open(conversations_file, "r") as file:
-        lines = file.readlines()
-        for i in range(0, len(lines), 2):
+     lines = file.readlines()
+     for i in range(0, len(lines), 2):
+        if i + 1 < len(lines):  # Check if there are enough lines
             user_query = lines[i].strip().split("User: ")[1]
             ai_response = lines[i+1].strip().split("AI: ")[1]
             if user_query.lower() == query.lower():
