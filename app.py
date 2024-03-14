@@ -460,13 +460,21 @@ def interact_with_piai(query):
         sleep(3)
         return text
 
-    # Check if the query matches any known intent
     for intent in data['intents']:
         if any(pattern in query.lower() for pattern in intent['patterns']):
             response = random.choice(intent['responses'])
             save_conversation(query, response)
             return response
-
+        
+    # Check if the user query matches any saved conversation
+    with open(conversations_file, "r") as file:
+        lines = file.readlines()
+        for i in range(0, len(lines), 2):
+            user_query = lines[i].strip().split("User: ")[1]
+            ai_response = lines[i+1].strip().split("AI: ")[1]
+            if user_query.lower() == query.lower():
+                return ai_response
+        
      # If the query doesn't match any known intent, interact with PIAI
     send_message_to_piai(query)
     result = scrape_results_from_piai()
