@@ -475,7 +475,7 @@ def interact_with_piai(query):
             if user_query.lower() == query.lower():
                 return ai_response
         
-     # If the query doesn't match any known intent, interact with PIAI
+    # If the query doesn't match any known intent or saved conversation, interact with PIAI
     send_message_to_piai(query)
     result = scrape_results_from_piai()
     save_conversation(query, result)
