@@ -1,7 +1,8 @@
-var Logouticon = document.getElementById("img");
+        
+        var Logouticon = document.getElementById("img");
         Logouticon.addEventListener('mouseover', function () {
-
         })
+
         // Set the initial width of the sidebar to 13.5%
         document.getElementById("mainContainer").style.marginLeft = "13.5%";
         document.getElementById("sidebar").style.width = "13.5%";
