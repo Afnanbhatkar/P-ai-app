@@ -8,7 +8,6 @@ import requests
 import wikipedia
 import webbrowser
 import keyboard
-import os
 
 # Import Selenium related modules
 from selenium import webdriver
