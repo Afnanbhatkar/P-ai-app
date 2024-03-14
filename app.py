@@ -8,6 +8,7 @@ import requests
 import wikipedia
 import webbrowser
 import keyboard
+import os
 
 # Import Selenium related modules
 from selenium import webdriver
@@ -395,6 +396,16 @@ def perform_google_search(query):
     results = list(search(query, num_results=3))
     return results
 
+# File path to save conversations
+conversations_file = "conversations.txt"
+
+# Function to save conversation to a file
+def save_conversation(query, response):
+    with open(conversations_file, "a") as file:
+        file.write(f"User: {query}\n")
+        file.write(f"AI: {response}\n")
+        file.write("\n")
+
 # Function to interact with PIAI website using Selenium
 def interact_with_piai(query):
     # Function to send message to PIAI
@@ -453,11 +464,14 @@ def interact_with_piai(query):
     # Check if the query matches any known intent
     for intent in data['intents']:
         if any(pattern in query.lower() for pattern in intent['patterns']):
-            return random.choice(intent['responses'])
+            response = random.choice(intent['responses'])
+            save_conversation(query, response)
+            return response
 
-    # If the query doesn't match any known intent, interact with PIAI
+     # If the query doesn't match any known intent, interact with PIAI
     send_message_to_piai(query)
     result = scrape_results_from_piai()
+    save_conversation(query, result)
     return result
 
 @app.route('/api/ai', methods=['POST'])
