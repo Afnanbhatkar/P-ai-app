@@ -398,47 +398,41 @@ def perform_google_search(query):
 # File path to save conversations
 conversations_file = "conversations.txt"
 
-# Function to save conversation to a file
-def save_conversation(query, response):
-    with open(conversations_file, "a") as file:
-        file.write(f"User: {query}\n")
+def save_conversation(user_query, response):
+    with open(conversations_file, "a", encoding="utf-8") as file:
+        file.write(f"User: {user_query}\n")
         file.write(f"AI: {response}\n")
         file.write("\n")
 
 # Function to interact with PIAI website using Selenium
 def interact_with_piai(query):
-    # Function to send message to PIAI
-    # Check if the query is about the current time
+    # Check if the query is about the current time, open youtube, or other predefined actions
     if "current time" in query.lower():
         current_time = time.strftime("%H:%M:%S", time.localtime())
         return f"The current time is {current_time}."
-    
     elif "open youtube" in query.lower():
         return webbrowser.open("https://www.youtube.com/")
-    
     elif 'google search' in query:
-     import wikipedia as googlescrap
-     query = query.replace('search', '')
-     query = query.replace('google', '')
-     
-    
-     try:
-        # Retrieve Wikipedia summary
-        summary = googlescrap.summary(query, sentences=3)
-        return summary
-     except Exception as e:
-        return "Wikipedia summary not available."
-    
+        # Perform Google search
+        import wikipedia as googlescrap
+        query = query.replace('search', '')
+        query = query.replace('google', '')
+        try:
+            # Retrieve Wikipedia summary
+            summary = googlescrap.summary(query, sentences=3)
+            return summary
+        except Exception as e:
+            return "Wikipedia summary not available."
     elif 'visit' in query or '.org' in query:
-     query = query.replace('website', '')
-     query = query.replace('open', '')
-     query = query.replace('jarvis', '')
-     query = query.replace('visit', '')
-     query = query.replace(' ', '')
-     query = query.replace('www.', '')
-     webbrowser.open('www.' + query + '.com')
-     return "Visiting " + query
- 
+        # Open the requested website
+        query = query.replace('website', '')
+        query = query.replace('open', '')
+        query = query.replace('jarvis', '')
+        query = query.replace('visit', '')
+        query = query.replace(' ', '')
+        query = query.replace('www.', '')
+        webbrowser.open('www.' + query + '.com')
+        return "Visiting " + query
     elif 'you need a break' in query:
         keyboard.press_and_release("ctrl + w")
         return "bye !!"
@@ -460,6 +454,7 @@ def interact_with_piai(query):
         sleep(3)
         return text
 
+    # Check if the user query matches any predefined intent
     for intent in data['intents']:
         if any(pattern in query.lower() for pattern in intent['patterns']):
             response = random.choice(intent['responses'])
@@ -467,15 +462,18 @@ def interact_with_piai(query):
             return response
         
     # Check if the user query matches any saved conversation
-    with open(conversations_file, "r") as file:
-     lines = file.readlines()
-     for i in range(0, len(lines), 2):
-        if i + 1 < len(lines):  # Check if there are enough lines
-            user_query = lines[i].strip().split("User: ")[1]
-            ai_response = lines[i+1].strip().split("AI: ")[1]
-            if user_query.lower() == query.lower():
-                return ai_response
-        
+    with open(conversations_file, "r", encoding="utf-8") as file:
+        lines = file.readlines()
+        for i in range(0, len(lines), 2):
+            if i < len(lines) and i + 1 < len(lines):  # Check if there are enough lines
+                user_line = lines[i].strip()
+                ai_line = lines[i+1].strip()
+                if user_line.startswith("User: ") and ai_line.startswith("AI: "):
+                    user_query = user_line.split("User: ")[1]
+                    ai_response = ai_line.split("AI: ")[1]
+                    if user_query.lower() == query.lower():
+                        return ai_response
+
     # If the query doesn't match any known intent or saved conversation, interact with PIAI
     send_message_to_piai(query)
     result = scrape_results_from_piai()
