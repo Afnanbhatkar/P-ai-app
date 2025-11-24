@@ -1,0 +1,18 @@
+User: hello
+AI: Hi there!
+
+User: how are you
+AI: I'm doing great, as always!  What's on your mind today, Afnan?
+
+User: who created you
+AI: A B is created by most talented engineer !! Mister Afnan
+
+User: ooo nice
+AI: I'm glad you liked it! If you'd like to create something or need assistance, just let me know.
+
+User: im also glad
+AI: That's great to hear! If there's anything you'd like to do or talk about, I'm here to help.
+
+User: how your day is going
+AI: Thank you for asking! As an AI, I don't have feelings or days like humans do, but I'm here and ready to assist you. How about you? How's your day going?
+

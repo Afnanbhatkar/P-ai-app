@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import random
 import time
@@ -6,10 +6,68 @@ from googlesearch import search
 from bs4 import BeautifulSoup
 import requests
 import wikipedia
+import webbrowser
+import keyboard
+
+# Import Selenium related modules
+from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
+from time import sleep
+import pathlib
+ScriptDir = pathlib.Path().absolute()
+
+chromedriver_path = str(pathlib.Path(r"chromedriver/chromedriver.exe"))  # Replace with actual path to chromedriver
+
+# Setup Chrome options
+chrome_option = Options()
+  
+user_agent = 'Mozilla/5.0 (W.indows NT 6.1) AppleWebKit/537.2 (KHTML, like Gecko) Chrome/22.0.1216.0 Safari/537.2'
+chrome_option.add_argument(f"user-agent={user_agent}")
+chrome_option.add_argument('--profile-directory=Default')
+
+chrome_option.add_argument("--disable-gpu")
+chrome_option.add_argument("--no-sandbox")
+chrome_option.add_argument("--disable-dev-shm-usage")
+chrome_option.add_argument("--remote-debugging-port=9222")
+
+
+# Specify user data directory for Chrome profile
+ScriptDir = pathlib.Path().absolute()
+chrome_option.add_argument(f"user-data-dir={ScriptDir / 'chromedata'}")
+
+# Use Service to specify the ChromeDriver path manually
+service = Service(chromedriver_path)
+
+# Launch the browser
+driver = webdriver.Chrome(service=service, options=chrome_option)
+
+# Maximize the window and open the desired URL
+driver.maximize_window()
+url = "https://deepai.org/chat/chatgpt-alternative"
+driver.get(url=url)
+
+# Wait for a few seconds to ensure the page has loaded
+sleep(3)
+# Function to wait for the PIAI website to load
+def website_opener():
+    while True:
+        try:
+            x_path = "/html/body/div[2]/main/div[9]/div"
+            driver.find_element(by=By.XPATH, value=x_path)
+            break
+        except:
+            pass
+
+website_opener()
+print("AI : IS READY TO GO!!")
+
 
 app = Flask(__name__)
 CORS(app)
-
 
 data = {
     "intents": [
@@ -344,78 +402,124 @@ data = {
         # Add more intents as needed
     ]
 }
-        # ... (your existing intents)
-
 responses = {}
 for intent in data['intents']:
     responses[intent['tag']] = intent['responses']
 
+
+# Function to get a response by tag
 def get_response_by_tag(tag):
     return random.choice(responses.get(tag, ["I'm not sure how to respond to that."]))
 
+# Function to perform Google search
 def perform_google_search(query):
     results = list(search(query, num_results=3))
     return results
 
-def extract_text_from_url(url):
-    try:
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.text, 'html.parser')
-        paragraphs = soup.find_all('p')[:1]
-        text = ' '.join([p.text for p in paragraphs])
-        return text if text else None
-    except requests.exceptions.Timeout:
-        print(f"Timeout error for URL: {url}")
-        return None
-    except requests.exceptions.RequestException as e:
-        print(f"Error extracting text from URL: {e}")
-        return None
+# File path to save conversations
+conversations_file = "conversations.txt"
 
-def extract_text_from_wikipedia(query):
-    try:
-        summary = wikipedia.summary(query, sentences=2)
-        return summary
-    except wikipedia.exceptions.DisambiguationError as e:
-        option = e.options[0]
-        summary = wikipedia.summary(option, sentences=2)
-        return summary
-    except wikipedia.exceptions.PageError:
-        return None
+def save_conversation(user_query, response):
+    with open(conversations_file, "a", encoding="utf-8") as file:
+        file.write(f"User: {user_query}\n")
+        file.write(f"AI: {response}\n")
+        file.write("\n")
+
+# Function to interact with PIAI website using Selenium
+def interact_with_piai(query):
+    # Check if the query is about the current time, open youtube, or other predefined actions
+    if "current time" in query.lower():
+        current_time = time.strftime("%H:%M:%S", time.localtime())
+        return f"The current time is {current_time}."
+    elif "open youtube" in query.lower():
+        return webbrowser.open("https://www.youtube.com/")
+    elif 'google search' in query:
+        # Perform Google search
+        import wikipedia as googlescrap
+        query = query.replace('search', '')
+        query = query.replace('google', '')
+        try:
+            # Retrieve Wikipedia summary
+            summary = googlescrap.summary(query, sentences=3)
+            return summary
+        except Exception as e:
+            return "Wikipedia summary not available."
+    elif 'visit' in query or '.org' in query:
+        # Open the requested website
+        query = query.replace('website', '')
+        query = query.replace('open', '')
+        query = query.replace('jarvis', '')
+        query = query.replace('visit', '')
+        query = query.replace(' ', '')
+        query = query.replace('www.', '')
+        webbrowser.open('www.' + query + '.com')
+        return "Visiting " + query
+    elif 'you need a break' in query:
+        keyboard.press_and_release("ctrl + w")
+        return "bye !!"
+
+    
+    def send_message_to_piai(query):
+        x_path = "/html/body/div[2]/main/div[9]/textarea"
+        driver.find_element(by=By.XPATH, value=x_path).send_keys(query)
+        sleep(1)
+        x_path2 = "/html/body/div[2]/main/div[9]/div/div/button[3]"
+        driver.find_element(by=By.XPATH, value=x_path2).click()
+        sleep(5 )
+
+    # Function to scrape results from PIAI
+    def scrape_results_from_piai():
+       sleep(2)
+
+       last_text = None
+
+    # Try div[2], div[4], div[6], ... up to div[100]
+       for i in range(2, 102, 2):
+        xp = f"/html/body/div[2]/main/form/div[{i}]/div[1]"
+        try:
+            el = driver.find_element(By.XPATH, xp)
+            last_text = el.text      # update every time we find one
+        except NoSuchElementException:
+            break                    # stop when this div doesn't exist
+
+       sleep(2)
+
+       if last_text:
+         return last_text             # this will be the LAST existing div
+       return "Could not scrape response."
+
+
+    # Check if the user query matches any predefined intent
+    for intent in data['intents']:
+        if any(pattern in query.lower() for pattern in intent['patterns']):
+            response = random.choice(intent['responses'])
+            save_conversation(query, response)
+            return response
+        
+    # Check if the user query matches any saved conversation
+    with open(conversations_file, "r", encoding="utf-8") as file:
+        lines = file.readlines()
+        for i in range(0, len(lines), 2):
+            if i < len(lines) and i + 1 < len(lines):  # Check if there are enough lines
+                user_line = lines[i].strip()
+                ai_line = lines[i+1].strip()
+                if user_line.startswith("User: ") and ai_line.startswith("AI: "):
+                    user_query = user_line.split("User: ")[1]
+                    ai_response = ai_line.split("AI: ")[1]
+                    if user_query.lower() == query.lower():
+                        return ai_response
+
+    # If the query doesn't match any known intent or saved conversation, interact with PIAI
+    send_message_to_piai(query)
+    result = scrape_results_from_piai()
+    save_conversation(query, result)
+    return result
 
 @app.route('/api/ai', methods=['POST'])
 def get_ai_response():
     user_message = request.json['message']
-
-    if 'who is' in user_message.lower() or 'tell me about' in user_message.lower():
-        name_query = user_message.split('who is')[-1].strip()
-        wikipedia_info = extract_text_from_wikipedia(name_query)
-        if wikipedia_info:
-            return jsonify(message=wikipedia_info)
-        else:
-            return jsonify(message="May I don't know now onwards I will get that information.")
-
-    for intent in data['intents']:
-        for pattern in intent['patterns']:
-            if pattern.lower() in user_message.lower():
-                if intent['tag'] == 'google_search':
-                    search_query = user_message.replace(pattern, '').strip()
-                    results = perform_google_search(search_query)
-                    ai_response = "Here are some search results:\n"
-                    for url in results:
-                        text_content = extract_text_from_url(url)
-                        if text_content:
-                            ai_response += f"\n- {text_content}\n"
-                        else:
-                            ai_response += f"\n- No data available for {url}\n"
-                    return jsonify(message=ai_response)
-                else:
-                    ai_response = get_response_by_tag(intent['tag'])
-                    time.sleep(1)
-                    return jsonify(message=ai_response)
-
-    time.sleep(1)
-    return jsonify(message="I'm not sure how to respond to that.")
+    piai_response = interact_with_piai(user_message)
+    return jsonify(message=piai_response)
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -27,6 +27,7 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin-left: 21px;
     color: #000000;
+    cursor: pointer;
 }
 
 .sticky-top span {
@@ -110,7 +111,7 @@ body {
 
 .Newchat {
     display: flex;
-    width: 200px;
+    width: 230px;
     align-items: center;
     padding-top: 5px;
     padding-bottom: 5px;
@@ -290,10 +291,29 @@ body {
 }
 
 .typing-animation {
+    width: 100px;
     display: inline-block;
     overflow: hidden;
     vertical-align: bottom;
-    animation: show 0.7s infinite;
+    animation: blink 1s infinite;
+    /* Blinking animation */
+}
+
+@keyframes blink {
+    0% {
+        opacity: 0;
+        /* Invisible */
+    }
+
+    50% {
+        opacity: 1;
+        /* Visible */
+    }
+
+    100% {
+        opacity: 0;
+        /* Invisible */
+    }
 }
 
 /* Scrollbar for the chat-box */
