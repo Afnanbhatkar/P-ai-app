@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Chat Application</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="howcan" id="howcan">
+        <img id="web-logo" src="https://cdn-icons-png.flaticon.com/128/165/165406.png" alt="web-logo">
+        <h2>How can i help you today?</h2>
+    </div>
+    <div class="page" id="page">
+    </div>
+    <div class="page1" id="page1">
+    </div>
+    <div class="modal-overlay" id="nameModal">
+        <div class="overlay"></div>
+        <div class="modal">
+            <label for="username">Enter your name:</label>
+            <input type="text" id="username">
+            <button onclick="login()">Login</button>
+        </div>  
+    </div>
+    <div class="sticky-top" id="sticky-top">
+        <!-- Add your content for the sticky top section here -->
+        <p id="logoutBtn" onclick="logout(), hidehowcan()"><img class="img" id="img"
+                src="https://cdn-icons-png.flaticon.com/128/14266/14266282.png"><span id="L">L</span>ogout</p>
+        <h1>Jarvis<span>1.2</span></h1>
+
+    </div>
+
+    <!-- Open Button -->
+    <div class="open-btn" onmouseover="hoverOpenBtn()" onmouseout="unhoverOpenBtn()" onclick="openNav()">❱</div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <p href="javascript:void(0)" class="closebtn" onclick="closeNav()">❰</p>
+
+        <p class="Newchat" onclick="resetChat(), handleNewChatClick() , Newchatcreated(), newchattext()"><img
+                class="gpt" src="https://cdn-icons-png.flaticon.com/128/165/165406.png"> 𝖭𝖾𝗐 𝖼𝗁𝖺𝗍</p>
+        <p class="days">Today</p>
+        <a class="text" id="currentchat">Currentchat</a>
+        <!-- Add more sidebar items as needed -->
+        <div id="userSection">
+            <p id="loggedInUser"></p>
+        </div>
+    </div>
+
+    <div class="container" id="mainContainer">
+        <!-- Your content goes here -->
+        <div class="chat-container">
+            <div class="chat-box" id="chatBox">
+                <!-- Chat messages will be displayed here -->
+            </div>
+            <div class="user-input" id="user-input">
+                <input type="text" id="userInput" placeholder="Message Piai...">
+                <button onclick="sendMessage()" id="sendButton">Send</button>
+                <button class="voice-input-button" onclick="startVoiceRecognition()"></button>
+            </div>
+            <div class="disclaimer" id="disclaimer">
+                <p>Piai can make mistakes. Consider checking important information.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js">
+        
+    </script>
+</body>
+
+</html>

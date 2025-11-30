@@ -1,0 +1,530 @@
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    height: 100vh;
+    overflow-x: hidden;
+}
+
+.sticky-top {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    margin: 0px 0px 6px;
+    background-color: white;
+    /* Adjust background color with opacity */
+    padding: 2px;
+    color: black;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+    /* Add backdrop filter for blur effect */
+    transition: margin-left 1s;
+}
+
+.sticky-top h1 {
+    margin-top: 14px;
+    font-size: 18px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin-left: 21px;
+    color: #000000;
+    cursor: pointer;
+}
+
+.sticky-top span {
+    color: #676767;
+    margin-left: 5px;
+}
+
+.container {
+    width: 100%;
+    background-color: white;
+    padding: 20px;
+    transition: margin-left 0.5s;
+}
+
+.chat-container {
+    left: 60%;
+    max-width: 770px;
+    margin-left: 30px;
+    margin: 50px auto;
+    background-color: white;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.howcan {
+    opacity: 0;
+    transition: opacity 0.5s ease, margin-left 0.5s ease;
+    height: 800px;
+    width: 42%;
+    margin-left: 36%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: white;
+    z-index: 4;
+}
+
+.howcan h2 {
+    color: black;
+    z-index: 5;
+    margin-top: 5px;
+    margin-left: 25%;
+    font-weight: 500;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#web-logo {
+    margin-top: 35%;
+    margin-left: 40%;
+    width: 48px;
+    height: 48px;
+
+}
+
+/* Add styles for the sidebar */
+.sidebar {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #f5f5f5;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
+}
+
+.sidebar a {
+
+    text-decoration: none;
+    padding-left: 10px;
+    margin-left: 12px;
+    margin-top: 8px;
+    font-size: 14px;
+    color: #0a0a0a;
+    display: block;
+    transition: 0.3s;
+
+}
+
+.Newchat {
+    display: flex;
+    width: 230px;
+    align-items: center;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    text-align: 20px;
+    text-decoration: none;
+    font-size: 15px;
+    color: black;
+    margin-top: -43px;
+    margin-left: 12px;
+    border-radius: 5px;
+    transition: 0.5s;
+}
+
+.Newchat:hover {
+    background-color: #d6d6db;
+}
+
+.gpt {
+    padding: 2px;
+    margin-left: 10px;
+    margin-right: 15px;
+    line-height: 50px;
+    width: 20px;
+    height: 20px;
+}
+
+.days {
+    padding-left: 10px;
+    margin-left: 10px;
+    margin-top: 30px;
+    font-size: 13px;
+    color: #818181;
+}
+
+.text {
+    background-color: #ccc;
+    padding: 10px;
+    margin-top: -6px;
+    border: 0 solid #e3e3e3;
+    width: 210px;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.sidebar .closebtn {
+    position: absolute;
+    color: rgba(124, 123, 123, 0.788);
+    top: 45%;
+    right: 10px;
+    font-size: 25px;
+    margin-left: 50px;
+    transition: 0.3s;
+}
+
+.closebtn:hover {
+    color: black;
+    cursor: pointer;
+    transform: scale(1.2);
+}
+
+.open-btn {
+    color: rgba(124, 123, 123, 0.788);
+    position: fixed;
+    left: 20px;
+    top: 50%;
+    font-size: 25px;
+    cursor: pointer;
+    z-index: 1;
+    transition: 0.3s;
+    /* Smooth transition on hover */
+}
+
+.open-btn:hover {
+    transform: scale(1.2);
+    /* Example: Increase the size on hover */
+    color: black;
+}
+
+.spacer {
+    height: 10px;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    height: 100vh;
+}
+
+
+.chat-header {
+    background-color: rgb(249, 248, 250);
+    color: #fff;
+    padding: 15px;
+    text-align: center;
+    border-bottom: 2px solid #2980b9;
+}
+
+.chat-box {
+    padding: 15px;
+    height: 800px;
+    max-height: 765px;
+    overflow-y: auto;
+}
+
+.user-input {
+    display: flex;
+    height: 40px;
+    padding: 10px;
+    align-items: center;
+    /* Align items vertically */
+}
+
+#userInput {
+    flex: 1;
+    /* Take remaining space */
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    margin-right: 10px;
+    outline: none;
+    width: 100px;
+}
+
+#sendButton {
+    background-color: gray;
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+    border-radius: 30px;
+    outline: none;
+    margin-left: -120px;
+    transition: background-color 0.3s ease;
+}
+
+.voice-input-button {
+    background-color: #fff;
+    color: #ccc;
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+    border-radius: 30px;
+    margin-left: 10px;
+    outline: none;
+}
+
+.voice-icon {
+    width: 16px;
+    height: 24px;
+    margin-right: 2px;
+}
+
+.message {
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    word-wrap: break-word;
+}
+
+.user {
+    color: MediumPurple;
+    text-align: right;
+    padding: 5px;
+    word-wrap: break-word;
+}
+
+.bot {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    background-color: whitesmoke;
+    border-radius: 7px;
+    margin-top: 10px;
+    color: #333;
+    text-align: left;
+    padding: 5px;
+    width: 550px;
+}
+
+.typing-animation {
+    width: 100px;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+    animation: blink 1s infinite;
+    /* Blinking animation */
+}
+
+@keyframes blink {
+    0% {
+        opacity: 0;
+        /* Invisible */
+    }
+
+    50% {
+        opacity: 1;
+        /* Visible */
+    }
+
+    100% {
+        opacity: 0;
+        /* Invisible */
+    }
+}
+
+/* Scrollbar for the chat-box */
+.chat-box::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chat-box::-webkit-scrollbar-thumb {
+    background-color: #3498db;
+    border-radius: 10px;
+}
+
+.chat-box::-webkit-scrollbar-track {
+    background-color: #f5f5f5;
+}
+
+.chat-box::-webkit-scrollbar-thumb:hover {
+    background-color: #2980b9;
+}
+
+.spacer {
+    height: 10px;
+}
+
+#midcontainer {
+    width: 6%;
+    background-color: white;
+    transition: margin-left 0.5s;
+}
+
+#midcontainer h4 {
+    margin-left: 10px;
+    transition: 0.5s;
+    padding: 5px;
+    width: 60px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#midcontainer h4:hover {
+    background-color: #f5f5f5;
+}
+
+.disclaimer {
+    margin-top: -17px;
+    margin-left: 150px;
+    font-size: 12px;
+    color: rgb(95, 91, 91);
+}
+
+/* Add a modal overlay style */
+.modal-overlay {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.modal {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+/* Add a style for the user section in the sidebar */
+#userSection {
+    margin-bottom: 40px;
+    display: none;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 10px;
+    background-color: #f5f5f5;
+}
+
+#logoutBtn {
+    padding-left: 5px;
+    text-align: center;
+    width: 10px;
+    position: fixed;
+    overflow: hidden;
+    padding: 5px;
+    left: 1580px;
+    margin-top: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: black;
+    background-color: #ddd;
+    transition: all 0.3s ease-in-out;
+}
+
+#logoutBtn:hover {
+    left: 1560px;
+    color: white;
+    background-color: black;
+    width: 64px;
+}
+
+#logoutBtn:hover .img {
+    left: 1560px;
+}
+
+#logoutBtn:hover #L {
+    opacity: 1;
+}
+
+.img {
+    opacity: 1;
+    width: 15px;
+    height: 15px;
+    margin-top: 0px;
+    position: fixed;
+    left: 1585px;
+    transition: all 0.4s ease;
+}
+
+#L {
+    transition: opacity 0.4s ease;
+    opacity: 0;
+    color: white;
+}
+
+.Newchat.active {
+    background-color: white;
+}
+
+.new-chat-text {
+    background-color: #ccc;
+    padding: 10px;
+    margin-top: -6px;
+    border: 0 solid #e3e3e3;
+    width: 210px;
+    border-radius: 5px;
+    transition: 0.5s;
+    margin-top: 5px;
+    transition: background-color 0.5s ease;
+    position: relative;
+}
+
+.new-chat-text:hover {
+    background-color: #ddd;
+}
+
+.delete-icon {
+    display: none;
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    right: 5px;
+}
+
+.new-chat-text:hover .delete-icon {
+    display: inline;
+}
+
+#currentchat {
+    transition: background-color 0.5s ease;
+}
+
+.displaychat {
+    margin-top: 50px;
+}
+
+.page {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #ccc;
+    transition: width 0.5s ease;
+    z-index: 5;
+    filter: blur(5px);
+}
+
+.page1 {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    top: 0;
+    right: 0;
+    /* Set the 'right' property to position it on the right side */
+    background-color: #ccc;
+    transition: width 0.5s ease;
+    z-index: 5;
+    filter: blur(5px);
+}
+
+@keyframes show {
+    0% {
+        visibility: hidden;
+    }
+
+    49% {
+        visibility: hidden;
+    }
+
+    50% {
+        visibility: visible;
+    }
+
+    100% {
+        visibility: visible;
+    }
+}

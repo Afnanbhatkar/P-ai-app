@@ -1,0 +1,1343 @@
+// src/App.jsx
+import React, { useEffect, useState, useRef } from "react";
+import { createPortal } from "react-dom";
+import { initializeApp } from "firebase/app";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut,
+  updateProfile,
+} from "firebase/auth";
+
+/** Portal wrapper to render popup to the document body */
+function Portal({ children }) {
+  if (typeof document === "undefined") return null;
+  return createPortal(children, document.body);
+}
+
+/** ================= FIREBASE CONFIG ================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyCU2GkpQamucoiAp5ohoK69exVsCvxTBq8",
+  authDomain: "project-pi-d29f1.firebaseapp.com",
+  databaseURL:
+    "https://project-pi-d29f1-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "project-pi-d29f1",
+  storageBucket: "project-pi-d29f1-firebasestorage.app",
+  messagingSenderId: "537385002664",
+  appId: "1:537385002664:web:43ade657eab7e297d1c49d",
+  measurementId: "G-F367BFN2NH",
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
+
+function App() {
+  // Auth & UI state
+  const [user, setUser] = useState(null);
+  const [loadingAuth, setLoadingAuth] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSignup, setIsSignup] = useState(false);
+  const [authError, setAuthError] = useState("");
+  const [username, setUsername] = useState("");
+  const [tempName, setTempName] = useState("");
+  const [loggedIn, setLoggedIn] = useState(false); // guest flag
+
+  // App visibility + animation control
+  const [appVisible, setAppVisible] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showHowCan, setShowHowCan] = useState(false);
+  const [showLoginSlide, setShowLoginSlide] = useState(true);
+
+  // Chat / layout state
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const [typedText, setTypedText] = useState("");
+  const [stickyTextIndex, setStickyTextIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const messagesEndRef = useRef(null);
+  const [chats, setChats] = useState([]);
+  const [currentChatId, setCurrentChatId] = useState(null);
+
+  // UI for per-chat menus / editing
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const [renameEditingId, setRenameEditingId] = useState(null);
+  const [renameValue, setRenameValue] = useState("");
+  const [loadingEdits, setLoadingEdits] = useState({});
+  const [menuPositions, setMenuPositions] = useState({});
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+
+  // Toasts
+  const [toasts, setToasts] = useState([]);
+  const toastIdRef = useRef(0);
+  const pushToast = (message, type = "info", ttl = 4000) => {
+    const id = ++toastIdRef.current;
+    setToasts((t) => [...t, { id, message, type }]);
+    setTimeout(() => {
+      setToasts((t) => t.filter((x) => x.id !== id));
+    }, ttl);
+  };
+
+  // typing / hints arrays
+  const texts = [
+    "to my interviewer ●",
+    "to our babysitter for the last-minute help ●",
+    "for a customer ●",
+    "for what to do with my kids' art ●",
+    "into three key ●",
+    "as a table of pros and cons ●",
+    "for my fantasy ●",
+    "for an orange cat we're adopting from the shelter ●",
+    "for selling a house ●",
+    "for hiring a store employee ●",
+  ];
+  const stickyHints = [
+    "Write a thank-you note",
+    "Write a thank-you note",
+    "Give me ideas",
+    "Give me ideas",
+    "Summarize this article",
+    "Summarize this article",
+    "Brainstorm names",
+    "Brainstorm names",
+    "Improve my post",
+    "Improve my post",
+  ];
+
+  // refs
+  const inputRef = useRef(null);
+
+  // suggestions pools
+  const SUGGESTION_POOLS = {
+    code: [
+      "Help me debug my code",
+      "Write a function to reverse a string",
+      "Optimize this loop for performance",
+      "Add unit tests for this module",
+      "Convert this function to async/await",
+      "Refactor into smaller components",
+      "Find security vulnerabilities in this snippet",
+      "Explain what this code does",
+      "Add type annotations (TypeScript)",
+      "Write a README for this project",
+    ],
+    plan: [
+      "Create a 7-day study plan",
+      "Plan a launch checklist for my app",
+      "Make a workout schedule for beginners",
+      "Outline a project timeline with milestones",
+      "Create a budget plan for the month",
+      "Plan a one-week meal prep",
+      "Write daily goals for productivity",
+      "Plan a content calendar for social media",
+      "Make a study timetable for exams",
+      "Draft a backup plan for deployments",
+    ],
+    brainstorm: [
+      "Ideas for blog topics about JavaScript",
+      "Product ideas for college students",
+      "Marketing taglines for a new SaaS",
+      "Unique app features for note-taking",
+      "Business names for a coffee shop",
+      "Side-project ideas to learn ML",
+      "Low-cost growth strategies for indie apps",
+      "Design concepts for a mobile UI",
+      "Slogans for eco-friendly products",
+      "Ways to improve onboarding conversion",
+    ],
+    surprise: [
+      "Tell me a fun programming challenge",
+      "Give me an interesting fact about space",
+      "Recommend a random book",
+      "Give me a quick brain teaser",
+      "Suggest a new hobby to try",
+      "Share a surprising historical story",
+      "Give a one-paragraph creative prompt",
+      "Give an unusual productivity hack",
+      "Suggest a recipe with eggs and spinach",
+      "Give a short daily mindfulness exercise",
+    ],
+    summarize: [
+      "Summarize the following text in 3 bullets",
+      "Create a 100-word summary from this article",
+      "Extract the key takeaways from this passage",
+      "Give an executive summary for this report",
+      "Convert this into a tweet-length summary",
+      "Summarize this for a 5th grader",
+      "Give the TL;DR in one sentence",
+      "Make a summary with pros and cons",
+      "Summarize the main argument and evidence",
+      "Create a short abstract for an academic paper",
+    ],
+    write: [
+      "Help me write an email asking for feedback",
+      "Draft a formal letter to my manager",
+      "Write a short product description",
+      "Help write a cover letter for a job",
+      "Write a polite bug report message",
+      "Draft a short blog post intro",
+      "Write a README section for setup",
+      "Write a short invitation message",
+      "Help me write test cases for this feature",
+      "Write a sample API usage snippet with explanation",
+    ],
+  };
+
+  // visible suggestions + mode + more menu
+  const [visibleSuggestions, setVisibleSuggestions] = useState([]);
+  const [suggestionMode, setSuggestionMode] = useState(null);
+  const [moreExpanded, setMoreExpanded] = useState(false);
+
+  // helper to pick n random items
+  const pickRandom = (arr, n = 4) => {
+    const pool = [...arr];
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    return pool.slice(0, n);
+  };
+
+  // unified pill click handler
+  const handlePillClick = (mode, initialText = "") => {
+    setSuggestionMode(mode);
+    const pool = SUGGESTION_POOLS[mode] || [];
+    setVisibleSuggestions(pickRandom(pool, 4));
+    setInput(initialText);
+    setShowHowCan(false);
+    setMoreExpanded(false);
+    setTimeout(() => inputRef.current?.focus(), 60);
+  };
+
+  // suggestion click: send and clear
+  const handleSuggestionClick = (sugg) => {
+    setVisibleSuggestions([]);
+    setSuggestionMode(null);
+    sendMessage(sugg);
+    setInput("");
+    setTimeout(() => inputRef.current?.focus(), 40);
+  };
+
+  // Close menu on outside click / Esc
+  useEffect(() => {
+    const onDocClick = () => {
+      setOpenMenuId(null);
+      setRenameEditingId(null);
+      setRenameValue("");
+      setDeleteConfirmId(null);
+    };
+    const onKey = (ev) => {
+      if (ev.key === "Escape") {
+        setOpenMenuId(null);
+        setRenameEditingId(null);
+        setRenameValue("");
+        setDeleteConfirmId(null);
+      }
+    };
+    document.addEventListener("click", onDocClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("click", onDocClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, []);
+
+  // scroll to bottom on messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // animation helper
+  const DEFAULT_ANIM_MS = 1200;
+  const animateCloseThen = (callback, durationMs = DEFAULT_ANIM_MS) => {
+    setShowLoginSlide(false);
+    setTimeout(() => {
+      if (typeof callback === "function") callback();
+    }, durationMs);
+  };
+
+  useEffect(() => {
+    if (user || loggedIn) {
+      animateCloseThen(() => {
+        setAppVisible(true);
+        setShowHowCan(true);
+        setTypedText("");
+      });
+    } else {
+      setAppVisible(false);
+      setShowHowCan(false);
+      setTimeout(() => setShowLoginSlide(true), 120);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, loggedIn]);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      setLoadingAuth(false);
+      if (u && u.displayName) setUsername(u.displayName);
+    });
+    return unsubscribe;
+  }, []);
+
+  const safeFetch = async (url, opts = {}) => {
+    try {
+      const token = await getIdToken();
+      if (!token) throw new Error("No auth token");
+      const res = await fetch(url, {
+        ...(opts || {}),
+        headers: { ...(opts.headers || {}), Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const txt = await res.text().catch(() => "");
+        throw new Error(txt || `HTTP ${res.status}`);
+      }
+      return await res.json().catch(() => ({}));
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  // sendMessage accepts optional override text
+  const sendMessage = async (textOverride = null) => {
+    const text = (textOverride ?? input ?? "").trim();
+    if (!text || sending) return;
+
+    // optimistic UI
+    setInput("");
+    setMessages((prev) => [...prev, { from: "user", text }]);
+    setSending(true);
+
+    // guest/local behavior
+    if (!user && loggedIn) {
+      setTimeout(() => {
+        addBotMessage(`(guest mode) I heard: "${text}" — try signing in to use full features.`);
+        setSending(false);
+      }, 600);
+      return;
+    }
+
+    try {
+      const token = await getIdToken();
+      if (!token) console.warn("No auth token present (continuing without token)");
+
+      // ensure chat exists
+      let chatIdToUse = currentChatId;
+      if (!chatIdToUse) {
+        const newRes = await fetch("http://localhost:5000/api/new-chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ firstMessage: text }),
+        });
+
+        const newData = await newRes.json().catch(() => ({}));
+        if (!newRes.ok) {
+          console.error("new-chat failed", newRes.status, newData);
+          addBotMessage(newData.error || "Failed to create chat.");
+          setSending(false);
+          return;
+        }
+
+        chatIdToUse = newData.chat?.id || newData.chatId || null;
+        setCurrentChatId(chatIdToUse);
+        if (newData.response) addBotMessage(newData.response);
+        setSending(false);
+        await loadChats();
+        return;
+      }
+
+      // existing chat -> POST to /api/ai
+      const res = await fetch("http://localhost:5000/api/ai", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ chatId: chatIdToUse, message: text }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        addBotMessage(data.message || data.response || "No response from AI.");
+        await loadChats();
+      } else {
+        console.error("AI call failed", res.status, data);
+        addBotMessage(data.error || "No connection to Jarvis.");
+      }
+    } catch (err) {
+      console.error("sendMessage error:", err);
+      addBotMessage("No connection to Jarvis.");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  // helper: get current ID token
+  const getIdToken = async () => {
+    const current = auth.currentUser;
+    if (!current) return null;
+    try {
+      return await current.getIdToken(false);
+    } catch (err) {
+      console.error("Failed to get ID token:", err);
+      return null;
+    }
+  };
+
+  // load chats
+  useEffect(() => {
+    if (!user) {
+      setChats([]);
+      setMessages([]);
+      setCurrentChatId(null);
+      return;
+    }
+    (async () => {
+      await loadChats();
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  const loadChats = async () => {
+    if (!user) return;
+    try {
+      const token = await getIdToken();
+      const res = await fetch("http://localhost:5000/api/chats", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) {
+        setChats([]);
+        return;
+      }
+      const data = (await res.json()) || [];
+
+      // assume server returns newest-first; set chats directly
+      setChats(data);
+
+      // Try to preserve existing selection (from state or localStorage)
+      const persisted = localStorage.getItem("currentChatId");
+      const desiredId = currentChatId || (persisted ? Number(persisted) : null);
+
+      if (desiredId) {
+        const existing = data.find((c) => c.id === desiredId);
+        if (existing) {
+          setCurrentChatId(existing.id);
+          setMessages((existing.messages || []).map((m) => ({ from: m.role === "user" ? "user" : "bot", text: m.content })));
+          return;
+        }
+      }
+
+      // fallback: use first chat (newest) if any
+      if (data.length > 0) {
+        const latest = data[0];
+        setCurrentChatId(latest.id);
+        localStorage.setItem("currentChatId", String(latest.id));
+        setMessages((latest.messages || []).map((m) => ({ from: m.role === "user" ? "user" : "bot", text: m.content })));
+      } else {
+        setCurrentChatId(null);
+        localStorage.removeItem("currentChatId");
+        setMessages([]);
+      }
+    } catch (err) {
+      console.error("loadChats error:", err);
+      setChats([]);
+    }
+  };
+
+
+  // append bot message helper
+  const addBotMessage = (text) => {
+    setMessages((prev) => [...prev, { from: "bot", text }]);
+    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
+  };
+
+  // auth helpers
+  const loginWithGoogle = async () => {
+    setAuthError("");
+    setSending(true);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      if (result?.user?.displayName) setUsername(result.user.displayName);
+      animateCloseThen(() => {
+        setAppVisible(true);
+        setShowHowCan(true);
+        setTypedText("");
+      });
+    } catch (err) {
+      console.error("Google login failed", err);
+      let msg = "Google login failed";
+      if (err?.code === "auth/popup-closed-by-user") msg = "Popup closed by user";
+      if (err?.code === "auth/popup-blocked") msg = "Popup blocked — allow popups";
+      setAuthError(msg + (err?.message ? `: ${err.message}` : ""));
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleEmailAuth = async (e) => {
+    e?.preventDefault?.();
+    setAuthError("");
+    setSending(true);
+    try {
+      if (isSignup) {
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        if (cred?.user && tempName?.trim()) {
+          try {
+            await updateProfile(cred.user, { displayName: tempName.trim() });
+            setUsername(tempName.trim());
+          } catch (err) {
+            console.warn("updateProfile failed:", err);
+          }
+        }
+      } else {
+        await signInWithEmailAndPassword(auth, email, password);
+      }
+      animateCloseThen(() => {
+        setAppVisible(true);
+        setShowHowCan(true);
+        setTypedText("");
+      });
+    } catch (err) {
+      console.error("Email auth error:", err);
+      setAuthError(err?.message || "Authentication failed");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    setShowHowCan(false);
+    try {
+      if (user) {
+        await signOut(auth);
+      }
+    } catch (err) {
+      console.error("firebase signout failed", err);
+    }
+    setTimeout(() => {
+      setAppVisible(false);
+      setShowLoginSlide(true);
+      localStorage.removeItem("loggedInUser");
+      setLoggedIn(false);
+      setUsername("");
+      setMessages([]);
+      setTypedText("");
+      setStickyTextIndex(0);
+      setCurrentChatId(null);
+      setChats([]);
+    }, 120);
+  };
+
+  const handleLogin = () => {
+    if (!tempName.trim()) return;
+    const name = tempName.trim();
+    setUsername(name);
+    localStorage.setItem("loggedInUser", name);
+    animateCloseThen(() => {
+      setLoggedIn(true);
+      setAppVisible(true);
+      setShowHowCan(true);
+      addBotMessage(`Welcome ${name}! How can I help you today?`);
+    });
+  };
+
+  // create new chat
+  const handleNewChat = async () => {
+    // Guest/local path: create and prepend, set current chat immediately
+    if (!user) {
+      const chatId = Date.now();
+      const greetingName = username || "there";
+      const botGreeting = `Hi ${greetingName}! 👋 I'm Jarvis — your assistant. How can I help you today?`;
+
+      const newChat = {
+        id: chatId,
+        title: "New Chat",
+        messages: [
+          { role: "user", content: "hii" },
+          { role: "assistant", content: botGreeting },
+        ],
+      };
+
+      // Prepend so newest-first order is preserved
+      setChats((prev) => [newChat, ...(prev || [])]);
+      setCurrentChatId(chatId);
+      localStorage.setItem("currentChatId", String(chatId));
+      setMessages([
+        { from: "user", text: "hii" },
+        { from: "bot", text: botGreeting },
+      ]);
+      setShowHowCan(false);
+      return;
+    }
+
+    // Authenticated path: create on server and insert front
+    setSending(true);
+    try {
+      const token = await getIdToken();
+      const res = await fetch("http://localhost:5000/api/new-chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token ? `Bearer ${token}` : undefined,
+        },
+        body: JSON.stringify({ firstMessage: "Hi Jarvis" }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && data.chat) {
+        // Prepend server chat and avoid duplicate entries
+        setChats((prev) => {
+          const without = (prev || []).filter((c) => c.id !== data.chat.id);
+          return [data.chat, ...without];
+        });
+
+        setCurrentChatId(data.chat.id);
+        localStorage.setItem("currentChatId", String(data.chat.id));
+        setMessages([
+          { from: "user", text: "Hi Jarvis" },
+          { from: "bot", text: data.response || "" },
+        ]);
+        setShowHowCan(false);
+      } else {
+        addBotMessage(data.error || "Failed to start chat.");
+      }
+    } catch (err) {
+      console.error("new chat error:", err);
+      addBotMessage("Failed to reach server.");
+    } finally {
+      setSending(false);
+    }
+  };
+
+
+  // chat edit helpers (toggle menu, rename, delete)
+  const toggleMenu = (e, chatId) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
+    if (e && e.nativeEvent && typeof e.nativeEvent.stopImmediatePropagation === "function") {
+      e.nativeEvent.stopImmediatePropagation();
+    }
+    const btn = e.currentTarget;
+    if (btn && btn.getBoundingClientRect) {
+      const rect = btn.getBoundingClientRect();
+      setMenuPositions((m) => ({ ...m, [chatId]: { left: Math.round(rect.left), top: Math.round(rect.bottom) } }));
+    }
+    setRenameEditingId(null);
+    setRenameValue("");
+    setDeleteConfirmId(null);
+    setOpenMenuId((prev) => (prev === chatId ? null : chatId));
+  };
+
+  const submitRename = async (e, chatId) => {
+    e?.stopPropagation();
+    const trimmed = (renameValue || "").trim();
+    if (!trimmed) {
+      pushToast("Name can't be empty", "error");
+      return;
+    }
+
+    const prevChats = chats;
+    setChats((prev) => prev.map((c) => (c.id === chatId ? { ...c, title: trimmed } : c)));
+    setLoadingEdits((s) => ({ ...s, [chatId]: true }));
+    setRenameEditingId(null);
+    setOpenMenuId(null);
+    pushToast("Renaming...", "info", 1200);
+
+    if (!user) {
+      setLoadingEdits((s) => ({ ...s, [chatId]: false }));
+      pushToast("Saved locally (guest mode). Sign in to persist permanently.", "warning");
+      return;
+    }
+
+    try {
+      const token = await getIdToken();
+      if (!token) throw new Error("No auth token");
+      const res = await fetch(`http://localhost:5000/api/chat/${chatId}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ title: trimmed }),
+      });
+      if (!res.ok) {
+        const txt = await res.text().catch(() => "");
+        setChats(prevChats);
+        console.error("Rename failed response:", res.status, txt);
+        pushToast(`Rename failed: ${txt || "status " + res.status}`, "error");
+        return;
+      }
+      const json = await res.json().catch(() => null);
+      if (json && json.chat) {
+        setChats((prev) => prev.map((c) => (c.id === chatId ? json.chat : c)));
+      }
+      pushToast("Renamed successfully", "success");
+    } catch (err) {
+      console.error("Rename error", err);
+      pushToast("Rename failed: " + (err.message || ""), "error");
+      setChats(prevChats);
+    } finally {
+      setLoadingEdits((s) => ({ ...s, [chatId]: false }));
+    }
+  };
+
+  const confirmDelete = async (e, chatId) => {
+    e?.stopPropagation();
+    const prevChats = chats;
+    setChats((prev) => prev.filter((c) => c.id !== chatId));
+    if (currentChatId === chatId) {
+      setCurrentChatId(null);
+      setMessages([]);
+      setShowHowCan(true);
+    }
+    setLoadingEdits((s) => ({ ...s, [chatId]: true }));
+    setOpenMenuId(null);
+    pushToast("Deleting...", "info", 1200);
+
+    if (!user) {
+      setLoadingEdits((s) => ({ ...s, [chatId]: false }));
+      pushToast("Deleted locally (guest mode). Sign in to delete from server.", "warning");
+      return;
+    }
+
+    try {
+      const token = await getIdToken();
+      if (!token) throw new Error("No auth token");
+      const res = await fetch(`http://localhost:5000/api/chat/${chatId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) {
+        const txt = await res.text().catch(() => "");
+        setChats(prevChats);
+        console.error("Delete failed response:", res.status, txt);
+        pushToast(`Delete failed: ${txt || "status " + res.status}`, "error");
+        return;
+      }
+      pushToast("Deleted", "success");
+      await loadChats();
+    } catch (err) {
+      console.error("Delete error", err);
+      pushToast("Delete failed: " + (err.message || ""), "error");
+      setChats(prevChats);
+    } finally {
+      setLoadingEdits((s) => ({ ...s, [chatId]: false }));
+      setDeleteConfirmId(null);
+    }
+  };
+
+  // typing animation for left panel
+  useEffect(() => {
+    if (!loggedIn && showLoginSlide) {
+      const currentText = texts[stickyTextIndex];
+      let timeout;
+      if (!isDeleting && typedText !== currentText) {
+        timeout = setTimeout(() => setTypedText(currentText.slice(0, typedText.length + 1)), 80);
+      } else if (isDeleting && typedText !== "") {
+        timeout = setTimeout(() => setTypedText(typedText.slice(0, -1)), 50);
+      } else if (!isDeleting && typedText === currentText) {
+        timeout = setTimeout(() => setIsDeleting(true), 2000);
+      } else if (isDeleting && typedText === "") {
+        setIsDeleting(false);
+        setStickyTextIndex((prev) => (prev + 1) % texts.length);
+      }
+      return () => clearTimeout(timeout);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [typedText, stickyTextIndex, isDeleting, loggedIn, showLoginSlide]);
+
+  // check guest login saved
+  useEffect(() => {
+    const savedUser = localStorage.getItem("loggedInUser");
+    if (savedUser) {
+      setUsername(savedUser);
+      animateCloseThen(() => {
+        setLoggedIn(true);
+        setAppVisible(true);
+        setShowHowCan(true);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // UI: loading
+  if (loadingAuth && !appVisible) {
+    return (
+      <div className="min-h-screen bg-orange-50 flex items-center justify-center">
+        <div className="text-3xl font-bold text-orange-600">Loading Jarvis...</div>
+      </div>
+    );
+  }
+
+  // Render
+  return (
+    <div className="min-h-screen w-full overflow-hidden bg-white relative font-sans font-medium">
+      {/* Toasts */}
+      <div className="fixed top-4 right-4 z-[60] flex flex-col gap-2">
+        {toasts.map((t) => (
+          <div
+            key={t.id}
+            className={`max-w-sm px-4 py-2 rounded-md shadow-md text-sm ${t.type === "error"
+                ? "bg-red-600 text-white"
+                : t.type === "success"
+                  ? "bg-green-600 text-white"
+                  : t.type === "warning"
+                    ? "bg-yellow-500 text-black"
+                    : "bg-gray-800 text-white"
+              }`}
+          >
+            {t.message}
+          </div>
+        ))}
+      </div>
+
+      {/* LOGIN / GUEST SLIDE */}
+      {!appVisible && (
+        <>
+          <style>{`
+            @keyframes gradientShift {
+              0% { background-position: 0% 50%; }
+              50% { background-position: 100% 50%; }
+              100% { background-position: 0% 50%; }
+            }
+            .no-seam { -webkit-backface-visibility: hidden; backface-visibility: hidden; will-change: transform, background-position; transform: translate3d(0,0,0); }
+          `}</style>
+
+          <div
+            className={`fixed inset-y-0 left-0 w-full md:w-3/5 z-50 transition-all duration-1000 ease-in-out transform-gpu no-seam ${showLoginSlide ? "translate-x-0" : "-translate-x-full"
+              }`}
+            style={{
+              background:
+                "linear-gradient(270deg, #fff7ed 0%, #f9f7f5 15%,#f8e9d9 30%, #f8ebdd 45%, #f2e2d0 60%, #f4e0c8 80%, #f2dcc1 100%)",
+              backgroundSize: "500% 500%",
+              animation: "gradientShift 14s ease-in-out infinite",
+              borderRight: "2px solid rgba(255, 240, 220, 0.85)",
+              willChange: "transform",
+              backfaceVisibility: "hidden",
+              WebkitBackfaceVisibility: "hidden",
+            }}
+          >
+            <div className="absolute inset-0 flex flex-col items-start justify-center px-10 md:px-20">
+              <h1 className="text-5xl md:text-6xl font-bold text-orange-600 mb-8">P-ai ●</h1>
+              <div className="text-4xl md:text-5xl font-bold text-orange-600 h-20 leading-tight">
+                {typedText}
+                <span className="animate-pulse text-orange-600 font-bold">|</span>
+              </div>
+              <div className="mt-10 text-xl md:text-2xl text-gray-700 font-medium">{stickyHints[stickyTextIndex]}</div>
+            </div>
+          </div>
+
+          <div
+            className={`fixed bg-[#f9f7f5] inset-y-0 right-0 w-full md:w-2/5 z-50 flex items-center justify-center transition-all duration-1000 delay-200 ease-in-out transform-gpu ${showLoginSlide ? "translate-x-0" : "translate-x-full"
+              }`}
+            style={{ willChange: "transform", backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
+          >
+            <div className="bg-[#f9f7f5] rounded-2xl shadow-xl p-8 w-full max-w-sm mx-4">
+              <h2 className="text-3xl font-extrabold text-center mb-8 text-[#d8bfa1]">Get Started</h2>
+
+              <label className="sr-only" htmlFor="guest-name">
+                Guest name
+              </label>
+              <input
+                id="guest-name"
+                type="text"
+                placeholder="Enter your name..."
+                value={tempName}
+                onChange={(e) => setTempName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none text-base transition mb-3"
+                aria-label="Enter your name to continue as guest"
+              />
+              <button
+                onClick={handleLogin}
+                disabled={!tempName.trim() || sending}
+                className={`w-full py-3 rounded-xl font-semibold text-white shadow-sm transition transform active:scale-95 ${!tempName.trim() || sending
+                    ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                    : "bg-gradient-to-r from-orange-500 to-amber-400 hover:from-orange-600 hover:to-amber-500"
+                  }`}
+                aria-disabled={!tempName.trim() || sending}
+              >
+                Continue →
+              </button>
+
+              <div className="my-4 text-center text-sm text-gray-400">or sign in</div>
+
+              <form onSubmit={handleEmailAuth} className="space-y-3">
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none text-sm"
+                  required
+                  aria-label="Email"
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none text-sm"
+                  required
+                  aria-label="Password"
+                />
+
+                {authError && <p className="text-red-500 text-xs mt-1">{authError}</p>}
+
+                <button
+                  type="submit"
+                  disabled={sending}
+                  className={`w-full mt-1 py-3 rounded-xl font-semibold text-[#d8bfa1] transition active:scale-95 ${sending ? "bg-gray-300 text-gray-600 cursor-not-allowed" : "bg-orange-100 hover:bg-[#e6cfb3] hover:text-[#faf4ed]"
+                    }`}
+                  aria-busy={sending}
+                >
+                  {isSignup ? "Sign Up" : "Log In"}
+                </button>
+              </form>
+
+              <button
+                onClick={loginWithGoogle}
+                disabled={sending}
+                className={`w-full mt-3 flex items-center justify-center gap-3 py-3 rounded-xl font-medium transition ${sending ? "opacity-60 cursor-not-allowed" : "bg-white shadow-sm hover:shadow-md"
+                  }`}
+                aria-label="Continue with Google"
+              >
+                <img src="https://www.google.com/favicon.ico" className="w-5 h-5" alt="Google" />
+                <span className="text-sm text-gray-700">Continue with Google</span>
+              </button>
+
+              <p className="text-center mt-4 text-sm text-gray-500">
+                {isSignup ? "Already have an account?" : "Don't have an account?"}{" "}
+                <button onClick={() => setIsSignup(!isSignup)} className="text-orange-600 font-semibold hover:underline">
+                  {isSignup ? "Log In" : "Sign Up"}
+                </button>
+              </p>
+
+              <p className="mt-6 text-xs text-gray-400 text-center">P-ai is powered by DeepAI + Firebase • Made by Afnan</p>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* MAIN APP */}
+      {appVisible && (
+        <>
+          {/* Sidebar */}
+          <div
+            className={`fixed top-0 left-0 h-full w-64 bg-[#fbf4e9] z-40 transform transition-transform duration-500 ease-in-out shadow-sm ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+              }`}
+            style={{ borderRight: "1px solid rgba(221,204,178,0.8)" }}
+          >
+            <button onClick={() => setSidebarOpen(false)} className="absolute top-4 right-3 -translate-y-0 text-2xl text-[#8a6f4a] hover:text-[#5e4529] transition p-1 rounded-md" aria-label="Close sidebar">
+              ❰
+            </button>
+
+            <div className="flex flex-col h-full">
+              <div className="px-6 pt-6 pb-4 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-md bg-[#e9dfc8] flex items-center justify-center font-bold text-green-800">Pi</div>
+                <div className="flex-1">
+                  <div className="text-sm font-semibold text-[#2f5a3d]">P-ai</div>
+                  <div className="text-xs text-[#8b7c63]">Your assistant</div>
+                </div>
+                <button className="text-sm text-[#8b7c63] px-2 py-1 rounded hover:bg-[#f3ead8]">☰</button>
+              </div>
+
+              <div className="px-4">
+                <button
+                  onClick={handleNewChat}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-white text-sm text-[#3c2f1e] hover:bg-[#fffdf8] border border-transparent hover:border-[#efe5cf] transition"
+                >
+                  <span className="text-lg">✎</span>
+                  <span>New chat</span>
+                </button>
+              </div>
+
+              <div className="px-4 mt-6">
+                <p className="text-xs text-[#9a8f7a] uppercase tracking-wide mb-2">Discover</p>
+                <div className="overflow-y-auto max-h-[48vh] space-y-2 relative">
+                  {chats.length === 0 ? (
+                    <div className="px-3 py-2 text-sm text-[#9a8f7a] italic">No chats yet</div>
+                  ) : (
+                    chats
+                      .slice()
+                      .reverse()
+                      .map((chat) => {
+                        const isMenuOpen = openMenuId === chat.id;
+                        const isRenaming = renameEditingId === chat.id;
+                        const isLoading = Boolean(loadingEdits?.[chat.id]);
+
+                        return (
+                          <div
+                            key={chat.id}
+                            onClick={() => {
+                              setCurrentChatId(chat.id);
+                              localStorage.setItem("currentChatId", String(chat.id));  // ⭐ FIX: persist selected chat
+                              setMessages(
+                                (chat.messages || []).map((m) => ({
+                                  from: m.role === "user" ? "user" : "bot",
+                                  text: m.content,
+                                }))
+                              );
+                              setShowHowCan(false);
+                              setOpenMenuId(null);
+                              setRenameEditingId(null);
+                              setDeleteConfirmId(null);
+                            }}
+                            className={`relative flex items-start gap-3 px-3 py-2 rounded-lg cursor-pointer transition select-none truncate ${chat.id === currentChatId ? "bg-[#f3e9d4] text-[#1f2b1f] font-medium shadow-inner" : "hover:bg-[#fbf7ef] text-[#3a352b]"
+                              }`}
+                          >
+                            <div className="flex-shrink-0 relative">
+                              <button
+                                type="button"
+                                onClick={(e) => toggleMenu(e, chat.id)}
+                                className="w-9 min-w-9 h-9 rounded-md bg-[#efe5d9] flex items-center justify-center text-sm text-[#6b5a41] p-0 relative"
+                                title="Edit chat (rename / delete)"
+                                aria-haspopup="true"
+                                aria-expanded={openMenuId === chat.id}
+                                aria-controls={`chat-menu-${chat.id}`}
+                              >
+                                {isLoading ? (
+                                  <svg className="w-5 h-5 animate-spin text-[#6b5a41]" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                                  </svg>
+                                ) : (
+                                  <span className="text-base">✎</span>
+                                )}
+                              </button>
+
+                              {isMenuOpen && (
+                                <Portal>
+                                  <div
+                                    id={`chat-menu-${chat.id}`}
+                                    role="menu"
+                                    tabIndex={-1}
+                                    onClick={(ev) => ev.stopPropagation()}
+                                    className="fixed z-[9999] bg-white rounded shadow-lg border border-gray-100 pointer-events-auto"
+                                    style={{
+                                      minWidth: 220,
+                                      left: (menuPositions[chat.id]?.left ?? 80) + "px",
+                                      top: (menuPositions[chat.id]?.top ?? 120) + "px",
+                                      transform: "translateY(6px)",
+                                    }}
+                                  >
+                                    {!isRenaming ? (
+                                      <div className="p-2">
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            setRenameEditingId(chat.id);
+                                            setRenameValue(chat.title || "");
+                                          }}
+                                          className="w-full text-left px-3 py-2 rounded hover:bg-gray-50 text-sm text-[#3a352b]"
+                                        >
+                                          Rename
+                                        </button>
+
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            setDeleteConfirmId(chat.id);
+                                          }}
+                                          className="w-full text-left px-3 py-2 mt-1 rounded hover:bg-gray-50 text-sm text-red-600"
+                                        >
+                                          Delete
+                                        </button>
+
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            setOpenMenuId(null);
+                                            setDeleteConfirmId(null);
+                                          }}
+                                          className="w-full text-left px-3 py-2 mt-1 rounded hover:bg-gray-50 text-sm text-[#8b7c63]"
+                                        >
+                                          Close
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <div className="p-2">
+                                        <input autoFocus value={renameValue} onChange={(ev) => setRenameValue(ev.target.value)} placeholder="New name" className="w-full px-2 py-2 border rounded text-sm mb-2" />
+                                        <div className="flex gap-2">
+                                          <button type="button" onClick={(e) => submitRename(e, chat.id)} className="flex-1 px-2 py-1 rounded bg-emerald-600 text-white text-sm">
+                                            Save
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={(ev) => {
+                                              ev.stopPropagation();
+                                              ev.preventDefault();
+                                              setRenameEditingId(null);
+                                              setRenameValue("");
+                                              setOpenMenuId(null);
+                                            }}
+                                            className="px-2 py-1 rounded bg-gray-100 text-sm"
+                                          >
+                                            Cancel
+                                          </button>
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {deleteConfirmId === chat.id && (
+                                      <div className="p-3 border-t">
+                                        <div className="text-sm text-[#6b5a41] mb-2">Delete permanently?</div>
+                                        <div className="flex gap-2">
+                                          <button type="button" onClick={(e) => confirmDelete(e, chat.id)} className="flex-1 px-2 py-1 rounded bg-red-600 text-white text-sm">
+                                            Delete
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={(ev) => {
+                                              ev.stopPropagation();
+                                              ev.preventDefault();
+                                              setDeleteConfirmId(null);
+                                              setOpenMenuId(null);
+                                            }}
+                                            className="px-2 py-1 rounded bg-gray-100 text-sm"
+                                          >
+                                            Cancel
+                                          </button>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                </Portal>
+                              )}
+                            </div>
+
+                            <div className="flex-1">
+                              <div className="text-sm truncate">{chat.title}</div>
+                              <div className="text-xs text-[#9a8f7a] truncate">{(chat.messages && chat.messages[chat.messages.length - 1]?.content?.slice(0, 50)) || ""}</div>
+                            </div>
+                          </div>
+                        );
+                      })
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-6 px-4">
+                <p className="text-xs text-[#b2a78f] mb-2">Monday</p>
+                <div className="text-sm text-[#5b5141]">Evening Greeting</div>
+              </div>
+
+              <div className="mt-auto px-4 pb-6">
+                <div className="flex items-center gap-3 bg-white rounded-lg p-3 border border-transparent hover:border-[#efe5cf]">
+                  <div className="w-9 h-9 rounded-full bg-[#efe5d9] flex items-center justify-center text-sm text-[#6b5a41]">A</div>
+                  <div className="flex-1 text-sm">
+                    <div className="text-xs text-[#6b5a41]">Logged in as</div>
+                    <div className="font-medium text-sm text-[#2f2a21] truncate">{username || user?.email || "Guest"}</div>
+                  </div>
+                </div>
+
+                <button onClick={handleLogout} className="mt-3 w-full text-left text-sm text-[#7e6f58] hover:text-[#5e4e38] px-3 py-2 rounded-md">
+                  Settings ⚙
+                </button>
+              </div>
+            </div>
+
+            <div className="absolute top-0 right-0 h-full" style={{ width: 1, background: "rgba(221,204,178,0.85)" }} />
+          </div>
+
+          {!sidebarOpen && (
+            <button onClick={() => setSidebarOpen(true)} className="fixed left-6 top-1/2 -translate-y-1/2 text-3xl text-[#8a6f4a] hover:text-[#5e4529] z-40 transition p-1 rounded-md" aria-label="Open sidebar">
+              ❱
+            </button>
+          )}
+
+          <div className={`fixed top-0 left-0 right-0 h-16 bg-orange-50 backdrop-blur-md z-30 flex items-center justify-between px-6 transition-all duration-500 ${sidebarOpen ? "ml-64" : "ml-0"}`}>
+            <h1 className="text-2xl font-bold text-emerald-800 ">
+              Jarvis <span className="text-gray-500 text-sm font-normal">1.2</span>
+            </h1>
+            <button onClick={handleLogout} className="flex items-center gap-2 bg-gray-200 hover:bg-black hover:text-white rounded-full px-5 py-2 text-sm font-medium transition">
+              <img src="https://cdn-icons-png.flaticon.com/128/14266/14266282.png" className="w-4 h-4" alt="logout" />
+              Logout
+            </button>
+          </div>
+
+          {/* Main Chat Container */}
+          <div className={`flex-1 flex flex-col h-screen transition-all duration-500 ${sidebarOpen ? "ml-64" : "ml-0"}`}>
+            <div className="flex-1 overflow-y-auto px-4 pt-20 pb-5 bg-orange-50">
+              <div className="max-w-4xl mx-auto space-y-6 py-8 ">
+                {showHowCan && messages.length === 0 && (
+                  <div className="text-center py-20 animate-fadeIn">
+                    <img src="https://cdn-icons-png.flaticon.com/128/165/165406.png" alt="logo" className="w-16 h-16 mx-auto mb-6" />
+                    <h2 className="text-3xl font-medium text-[#6b5a41] mb-6">How can I help you today?</h2>
+
+                    <button
+                      onClick={() => {
+                        setShowHowCan(false);
+                        setMessages((prev) => [...prev, { from: "user", text: "hii" }]);
+                        setTimeout(() => {
+                          addBotMessage("Hello! How can I help?");
+                          inputRef.current?.focus();
+                        }, 400);
+                      }}
+                      className="px-5 py-3 bg-[#fffdf8] text-[#9f8969] rounded-full text-lg font-medium hover:bg-[#ede0cb] border border-[#efe5cf] hover:border-[#efe5cf] transition shadow-inner ease-in mb-6"
+                    >
+                      Start chatting
+                    </button>
+
+                    {/* action pills */}
+                    <div className="mt-10 flex justify-center">
+                      <div className="inline-flex flex-wrap gap-4 justify-center max-w-2xl">
+                        <button onClick={() => handlePillClick("code", "create code")} className="flex items-center gap-3 px-5 py-3 bg-[#fffdf8] text-[#9f8969] rounded-full text-lg font-medium hover:bg-[#ede0cb] border border-[#efe5cf] transition shadow-inner ease-in">
+                          <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7" />
+                            <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M21 7l-9 6-9-6" />
+                          </svg>
+                          <span className="text-sm font-medium">Create Code</span>
+                        </button>
+
+                        <button onClick={() => handlePillClick("plan", "make a plan")} className="flex items-center gap-3 px-5 py-3 bg-[#fffdf8] text-[#9f8969] rounded-full text-lg font-medium hover:bg-[#ede0cb] border border-[#efe5cf] transition shadow-inner ease-in">
+                          <svg className="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M12 2v6" />
+                            <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M5 11h14" />
+                          </svg>
+                          <span className="text-sm font-medium">Make a plan</span>
+                        </button>
+
+                        <button onClick={() => handlePillClick("brainstorm", "brainstorm")} className="flex items-center gap-3 px-5 py-3 bg-[#fffdf8] text-[#9f8969] rounded-full text-lg font-medium hover:bg-[#ede0cb] border border-[#efe5cf] transition shadow-inner ease-in">
+                          <svg className="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M12 2a7 7 0 00-7 7c0 4.418 7 13 7 13s7-8.582 7-13a7 7 0 00-7-7z" />
+                          </svg>
+                          <span className="text-sm font-medium">Brainstorm</span>
+                        </button>
+
+                        <button onClick={() => handlePillClick("surprise", "surprise me")} className="flex items-center gap-3 px-5 py-3 bg-[#fffdf8] text-[#9f8969] rounded-full text-lg font-medium hover:bg-[#ede0cb] border border-[#efe5cf] transition shadow-inner ease-in">
+                          <svg className="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M3 7h18M7 17h10" />
+                          </svg>
+                          <span className="text-sm font-medium">Surprise me</span>
+                        </button>
+
+                        <div className="relative inline-block">
+                          <button onClick={() => setMoreExpanded((s) => !s)} className="flex items-center gap-3 px-5 py-3 bg-[#fffdf8] text-[#9f8969] rounded-full text-lg font-medium hover:bg-[#ede0cb] border border-[#efe5cf] transition shadow-inner ease-in">
+                            <svg className="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <circle cx="12" cy="12" r="3" strokeWidth="2" />
+                            </svg>
+                            <span className="text-sm font-medium">More</span>
+                          </button>
+
+                          {moreExpanded && (
+                            <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-lg border border-gray-100 p-3 z-50">
+                              <button onClick={() => handlePillClick("summarize", "summarize text")} className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 text-sm text-[#3a352b]">
+                                Summarize text
+                              </button>
+                              <button onClick={() => handlePillClick("write", "help me write")} className="w-full text-left mt-2 px-3 py-2 rounded-lg hover:bg-gray-50 text-sm text-[#3a352b]">
+                                Help me write
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Messages */}
+                {messages.map((msg, i) => (
+                  <div key={i} className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}>
+                    <div className={`max-w-2xl px-4 py-4 rounded-3xl ${msg.from === "user" ? "bg-[#fcf2e6] text-black" : "text-[#53493a]"}`}>
+                      {msg.from === "bot" && (
+                        <div className="flex items-center gap-3 mb-2">
+                          <img src="https://cdn-icons-png.flaticon.com/128/165/165406.png" className="w-6 h-6" alt="bot" />
+                          <strong>P-ai</strong>
+                        </div>
+                      )}
+                      <div className="whitespace-pre-wrap break-words text-lg leading-8">{msg.text}</div>
+                    </div>
+                  </div>
+                ))}
+
+                {loading && (
+                  <div className="flex justify-start">
+                    <div className="bg-gray-100 px-6 py-4 rounded-3xl text-gray-500">Jarvis is typing...</div>
+                  </div>
+                )}
+
+                <div ref={messagesEndRef} />
+              </div>
+            </div>
+
+            {/* suggestion chips */}
+            {visibleSuggestions.length > 0 && (
+              <div className="max-w-4xl mx-auto px-4 sm:px-6 mb-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  {visibleSuggestions.map((sugg, idx) => (
+                    <button key={idx} onClick={() => handleSuggestionClick(sugg)} className="px-3 py-2 rounded-full bg-white border border-[#efe5cf] text-sm text-[#3a352b] shadow-sm hover:shadow-md transition">
+                      {sugg}
+                    </button>
+                  ))}
+
+                  <button
+                    onClick={() => {
+                      if (!suggestionMode) return;
+                      const pool = SUGGESTION_POOLS[suggestionMode] || [];
+                      setVisibleSuggestions(pickRandom(pool, 4));
+                    }}
+                    title="Show different suggestions"
+                    className="ml-2 px-3 py-2 rounded-full border border-[#e6e0d3] bg-[#fffdf8] text-sm text-[#9f8969] shadow-sm hover:bg-[#f6f0e6] transition"
+                  >
+                    Shuffle ↺
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Input Box */}
+            <div className="px-4 sm:px-6 pb-8 bg-orange-50 ">
+              <div className="max-w-4xl mx-auto">
+                <div className="bg-[#faf5ef] rounded-3xl p-5 flex gap-4 items-center backdrop-blur-sm transition-all duration-300 shadow-lg border border-transparent hover:shadow-none hover:border-[#dec19d] focus-within:border-[#dec19d] focus-within:shadow-none">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
+                    placeholder="What's on your mind?"
+                    className="flex-1 w-full bg-transparent outline-none border-none placeholder-[#d8bfa1] text-lg"
+                  />
+                  <button
+                    onClick={() => sendMessage()}
+                    disabled={!input.trim() || sending}
+                    className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-lg active:scale-105 ${!input.trim() ? "bg-[#f5ede4] text-[#c7b29e] shadow-inner" : "bg-emerald-600 text-white shadow-lg hover:bg-emerald-700"
+                      }`}
+                  >
+                    <svg className={`w-7 h-7 ${!input.trim() ? "opacity-70" : "opacity-100"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19V5m-7 7l7-7 7 7" />
+                    </svg>
+                  </button>
+                </div>
+                <p className="text-center text-xs text-gray-500 mt-4">P-ai can make mistakes. Consider checking important information.</p>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+export default App;

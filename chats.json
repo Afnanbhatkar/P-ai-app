@@ -1,0 +1,678 @@
+[
+  {
+    "id": 1,
+    "title": "New chat started",
+    "messages": [
+      {
+        "role": "user",
+        "content": "New chat started"
+      },
+      {
+        "role": "assistant",
+        "content": "No reply"
+      },
+      {
+        "role": "user",
+        "content": "who is modi"
+      },
+      {
+        "role": "assistant",
+        "content": "No reply"
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "Hello!"
+      },
+      {
+        "role": "user",
+        "content": "how are you"
+      },
+      {
+        "role": "assistant",
+        "content": "I'm doing great, as always!  What's on your mind today, Afnan?"
+      },
+      {
+        "role": "user",
+        "content": "who is modi"
+      },
+      {
+        "role": "assistant",
+        "content": "Modi refers to Narendra Modi, an Indian politician who has been serving as the Prime Minister of India since 2014. He is a member of the Bharatiya Janata Party (BJP) and has played a significant role in Indian politics, implementing various policies and initiatives aimed at economic development, infrastructure improvement, and social reforms."
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! How can I assist you today?"
+      },
+      {
+        "role": "user",
+        "content": "how are you"
+      },
+      {
+        "role": "assistant",
+        "content": "Doing well, Afnan! Thank you for checking in. 😊 What's on your mind today?"
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi there!"
+      },
+      {
+        "role": "user",
+        "content": "how are you"
+      },
+      {
+        "role": "assistant",
+        "content": "I'm doing great, as always!  What's on your mind today, Afnan?"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "title": "New chat started",
+    "messages": [
+      {
+        "role": "user",
+        "content": "New chat started"
+      },
+      {
+        "role": "assistant",
+        "content": "No reply"
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "No reply"
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "No reply"
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! How can I assist you today?"
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi there!"
+      },
+      {
+        "role": "user",
+        "content": "how are you"
+      },
+      {
+        "role": "assistant",
+        "content": "Doing great, thanks for asking! 😊 Ready to assist or just chat, whatever you'd like!"
+      },
+      {
+        "role": "user",
+        "content": "what up"
+      },
+      {
+        "role": "assistant",
+        "content": "Could not scrape response."
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "Hello!"
+      },
+      {
+        "role": "user",
+        "content": "how are you"
+      },
+      {
+        "role": "assistant",
+        "content": "I'm doing great, as always!  What's on your mind today, Afnan?"
+      },
+      {
+        "role": "user",
+        "content": "who is modi"
+      },
+      {
+        "role": "assistant",
+        "content": "Could not scrape response."
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi there!"
+      },
+      {
+        "role": "user",
+        "content": "who is modi"
+      },
+      {
+        "role": "assistant",
+        "content": "No reply yet..."
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! How can I assist you today?"
+      },
+      {
+        "role": "user",
+        "content": "who is modi"
+      },
+      {
+        "role": "assistant",
+        "content": "No reply yet..."
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "Hello!"
+      },
+      {
+        "role": "user",
+        "content": "who is modi"
+      },
+      {
+        "role": "assistant",
+        "content": "No reply yet..."
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "No reply"
+      },
+      {
+        "role": "user",
+        "content": "how are you"
+      },
+      {
+        "role": "assistant",
+        "content": "No reply"
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi there!"
+      },
+      {
+        "role": "user",
+        "content": "how are you"
+      },
+      {
+        "role": "assistant",
+        "content": "Doing well, Afnan! Thank you for checking in. 😊 What's on your mind today?"
+      },
+      {
+        "role": "user",
+        "content": "who is modi"
+      },
+      {
+        "role": "assistant",
+        "content": "DeepAI is slow or blocked. Try again in 10 seconds."
+      },
+      {
+        "role": "user",
+        "content": "who created microsoft"
+      },
+      {
+        "role": "assistant",
+        "content": "DeepAI is slow or blocked. Try again in 10 seconds."
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "Hello!"
+      },
+      {
+        "role": "user",
+        "content": "how are you"
+      },
+      {
+        "role": "assistant",
+        "content": "I'm doing great, thanks for asking, Afnan! I'm always ready to assist you with whatever you need.  Is there anything specific you'd like to chat about today?"
+      },
+      {
+        "role": "user",
+        "content": "who is modi"
+      },
+      {
+        "role": "assistant",
+        "content": "Could not scrape response."
+      },
+      {
+        "role": "user",
+        "content": "who is bill gates"
+      },
+      {
+        "role": "assistant",
+        "content": "Bill Gates is an American business magnate, software developer, philanthropist, and co-founder of Microsoft Corporation. He was born on October 28, 1955. Gates played a key role in the personal computer revolution by developing and leading Microsoft, which became one of the world's largest and most influential technology companies. Besides his business achievements, he is also known for his philanthropic work through the Bill & Melinda Gates Foundation, focusing on global health, education, and poverty alleviation."
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! How can I assist you today?"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "title": "Chat 3",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hi"
+      },
+      {
+        "role": "assistant",
+        "content": "Error: Message: no such element: Unable to locate element: {\"method\":\"xpath\",\"selector\":\"//textarea[@placeh... (Is Chrome open?)"
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "Error: Message: no such element: Unable to locate element: {\"method\":\"xpath\",\"selector\":\"//textarea[@placeh... (Is Chrome open?)"
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "Error: Message: no such element: Unable to locate element: {\"method\":\"xpath\",\"selector\":\"//textarea[@placeh... (Is Chrome open?)"
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": ""
+      },
+      {
+        "role": "user",
+        "content": "who is modi"
+      },
+      {
+        "role": "assistant",
+        "content": ""
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": ""
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi there!"
+      },
+      {
+        "role": "user",
+        "content": "how are you"
+      },
+      {
+        "role": "assistant",
+        "content": "Doing great, thanks for asking! 😊 Ready to assist or just chat, whatever you'd like!"
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "Hello!"
+      },
+      {
+        "role": "user",
+        "content": "how are you"
+      },
+      {
+        "role": "assistant",
+        "content": "Doing great, thanks for asking! 😊 Ready to assist or just chat, whatever you'd like!"
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "DeepAI is thinking..."
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! How can I assist you today?"
+      },
+      {
+        "role": "user",
+        "content": "write a letter to principle that i will pay the fees at the end of december in proper format"
+      },
+      {
+        "role": "assistant",
+        "content": "Certainly! Here's a formal letter to your principal regarding your fee payment:\n[Your Name]\n[Your Class/Grade]\n[Your Roll Number or Student ID]\n[Date]\nTo,\nThe Principal\n[School Name]\n[School Address]\nSubject: Request for Extension to Pay Fees until End of December\nDear Sir/Madam,\nI hope this letter finds you well. I am writing to kindly request an extension for paying my school fees. Due to certain personal reasons, I am unable to make the payment at this moment. I assure you that I will settle the pending fees by the end of December.\nI sincerely apologize for any inconvenience this may cause and request your understanding and support in this matter. I will ensure that the dues are cleared within the specified time.\nThank you for your consideration.\nYours sincerely,\n[Your Name]\n[Your Class/Grade]\n[Your Contact Number]\nWould you like me to customize it further?"
+      },
+      {
+        "role": "user",
+        "content": "open youtube"
+      },
+      {
+        "role": "assistant",
+        "content": true
+      },
+      {
+        "role": "user",
+        "content": "current time"
+      },
+      {
+        "role": "assistant",
+        "content": "The current time is 04:08:15."
+      },
+      {
+        "role": "user",
+        "content": "search virat kohli"
+      },
+      {
+        "role": "assistant",
+        "content": "I can't perform live searches, but I can provide you with some information about Virat Kohli!\nVirat Kohli is a renowned Indian cricketer and one of the best batsmen in the world. He has played for the Indian national team since 2008 and has set numerous records, including being one of the fastest to reach 8,000, 9,000, 10,000, 11,000, and 12,000 runs in ODIs. Kohli has also captained the Indian cricket team and is known for his aggressive playing style and leadership qualities.\nWould you like more specific information about his career, achievements, or recent news?"
+      },
+      {
+        "role": "user",
+        "content": "google search virat kohli"
+      },
+      {
+        "role": "assistant",
+        "content": "Virat Kohli (Hindi pronunciation: [ʋɪˈɾaːʈᵊ ˈkoːɦᵊliː] , born 5 November 1988) is an Indian international cricketer and the former captain of the Indian national cricket team. He is a right-handed batsman and an occasional medium-pace bowler. He currently represents Royal Challengers Bengaluru in the IPL and Delhi in domestic cricket."
+      },
+      {
+        "role": "user",
+        "content": "jarvis open instagram"
+      },
+      {
+        "role": "assistant",
+        "content": "Yes sir"
+      },
+      {
+        "role": "user",
+        "content": "jarvis open youtube"
+      },
+      {
+        "role": "assistant",
+        "content": true
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "title": "Chat 4",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hi"
+      },
+      {
+        "role": "assistant",
+        "content": "DeepAI is thinking..."
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "DeepAI is thinking..."
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "DeepAI is generating response..."
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi there!"
+      },
+      {
+        "role": "user",
+        "content": "how are you"
+      },
+      {
+        "role": "assistant",
+        "content": "I'm doing great, thanks for asking, Afnan! I'm always ready to assist you with whatever you need.  Is there anything specific you'd like to chat about today?"
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! How can I assist you today?"
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "title": "Chat 5",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hi"
+      },
+      {
+        "role": "assistant",
+        "content": "DeepAI is thinking..."
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "Hello! How can I assist you today?"
+      },
+      {
+        "role": "user",
+        "content": "how are you"
+      },
+      {
+        "role": "assistant",
+        "content": "I'm doing well, thank you! How about you? How can I help you today?"
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "title": "Chat 6",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hi"
+      },
+      {
+        "role": "assistant",
+        "content": "Hello!"
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi there!"
+      },
+      {
+        "role": "user",
+        "content": "how are you bro"
+      },
+      {
+        "role": "assistant",
+        "content": "Doing great, thanks for asking! 😊 Ready to assist or just chat, whatever you'd like!"
+      },
+      {
+        "role": "user",
+        "content": "youtube was increated in??"
+      },
+      {
+        "role": "assistant",
+        "content": "YouTube was created in 2005."
+      },
+      {
+        "role": "user",
+        "content": "okk nice one"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you! If you have any more questions or need assistance, feel free to ask."
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "title": "Chat 7",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hi"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi there!"
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "title": "Chat 8",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hi"
+      },
+      {
+        "role": "assistant",
+        "content": "Hey! How can I assist you today?"
+      },
+      {
+        "role": "user",
+        "content": "whatsup"
+      },
+      {
+        "role": "assistant",
+        "content": "Hello! I'm here to help you with anything you need. How can I assist you today?"
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "title": "Chat 9",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hi"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi there!"
+      },
+      {
+        "role": "user",
+        "content": "hello"
+      },
+      {
+        "role": "assistant",
+        "content": "Hello!"
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "title": "Chat 10",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hi"
+      },
+      {
+        "role": "assistant",
+        "content": "Hi there!"
+      },
+      {
+        "role": "user",
+        "content": "create a calculator in react"
+      },
+      {
+        "role": "assistant",
+        "content": "Sure! Here's a simple calculator example in React:\n          Copy\n          Run\n          import React, { useState } from 'react';\n\nfunction Calculator() {\n  const [input, setInput] = useState('');\n  \n  const handleClick = (value) => {\n    setInput(input + value);\n  };\n  \n  const handleClear = () => {\n    setInput('');\n  };\n  \n  const handleCalculate = () => {\n    try {\n      // Evaluate the expression\n      setInput(String(eval(input)));\n    } catch {\n      setInput('Error');\n    }\n  };\n  \n  return (\n    <div style={{ maxWidth: '200px', margin: 'auto' }}>\n      <h2>Calculator</h2>\n      <input\n        type=\"text\"\n        value={input}\n        readOnly\n        style={{ width: '100%', height: '30px', fontSize: '1.2em', textAlign: 'right' }}\n      />\n      <div style={{ display: 'flex', flexWrap: 'wrap' }}>\n        {['7', '8', '9', '+', '4', '5', '6', '-', '1', '2', '3', '*', '0', '.', '=', '/'].map((btn) => (\n          <button\n            key={btn}\n            onClick={() => btn === '=' ? handleCalculate() : handleClick(btn)}\n            style={{ width: '50px', height: '50px', margin: '5px', fontSize: '1em' }}\n          >\n            {btn}\n          </button>\n        ))}\n        <button onClick={handleClear} style={{ width: '105px', height: '50px', margin: '5px', fontSize: '1em' }}>\n          Clear\n        </button>\n      </div>\n    </div>\n  );\n}\n\nexport default Calculator;\n      You can use this code inside a React project. It creates a basic calculator with buttons for digits, operations, clear, and equals.\nWould you like me to help you set up a full React app or customize this further?"
+      },
+      {
+        "role": "user",
+        "content": "how are you"
+      },
+      {
+        "role": "assistant",
+        "content": "Doing well, Afnan! Thank you for checking in. 😊 What's on your mind today?"
+      }
+    ]
+  }
+]
